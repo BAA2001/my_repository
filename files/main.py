@@ -4,9 +4,10 @@ import os
 from zipfile import ZipFile
 
 cache_file = "cache"
+data = "data.zip"
 cache_dir = os.getcwd()
 cache_path = os.path.join(cache_dir, cache_file)
-zip_path = "C:/Users/aboua/OneDrive/Desktop/Winc/github_repository/files/data.zip"
+zip_path = os.path.join(cache_dir, data)
 
 
 def clean_cache():
@@ -17,15 +18,9 @@ def clean_cache():
             os.remove(os.path.join(cache_path, files))
 
 
-clean_cache()
-
-
 def cache_zip(zip_file_path, cache_dir_path):
     with ZipFile(zip_file_path, "r") as zObject:
         zObject.extractall(cache_dir_path)
-
-
-cache_zip(zip_file_path=zip_path, cache_dir_path=cache_path)
 
 
 def cached_files():
@@ -33,15 +28,16 @@ def cached_files():
     return files
 
 
-print(cached_files())
-
-
 def find_password(files=cached_files()):
     for file in files:
         with open(file) as f:
             for item in f:
                 if "password" in item:
-                    print(item)
+                    print(item[10:])
 
 
-find_password(cached_files())
+if __name__ == "__main__":
+    clean_cache()
+    cache_zip(zip_file_path=zip_path, cache_dir_path=cache_path)
+    cached_files()
+    find_password(cached_files())
