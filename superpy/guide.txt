@@ -1,0 +1,54 @@
+Welcome to the SuperPy command line tool! 
+
+This guide will provide you with all the information you need to use this tool effectively.
+
+The tool is used for recording and tracking purchases and sales of items. It allows you to add items, view reports on inventory, revenue, and profit, and set the date for which the report is generated.
+
+To get started, you need to first run the script with the command line arguments. Here is the basic structure of the command:
+
+	python SuperPy.py <command> [options]
+
+The available commands are:
+
+1. buy: Used to record a purchase of an item
+2. sell: Used to record a sale of an item
+3. report: Used to generate reports on inventory, revenue, and profit
+
+Here are some examples of using the different commands:
+
+To record a purchase:
+
+	python SuperPy.py buy -bn "item_name" -bc 5 -bp 10.50 -e "2022-03-15"
+
+This command records a purchase of 5 units of "item_name" at a price of $10.50 each with an expiration date of March 15, 2022.
+
+
+To record a sale:
+
+	python SuperPy.py sell -sn "item_name" -sc 3 -sp 12.50
+
+This command records a sale of 3 units of "item_name" at a price of $12.50 each.
+
+
+To generate a report on inventory:	
+
+	python SuperPy.py report -i "2022-03-01"
+
+This command generates a report on the inventory as of March 1, 2022.
+
+
+To generate a report on revenue:
+	
+	python SuperPy.py report -p "2022-03-01"
+
+This command generates a report on the profit generated between the date set and March 1, 2022.
+
+In addition to the commands above, you can also set the date for which the report is generated.
+
+	python SuperPy.py --set_time "2022-03-01" report -p yesterday
+
+This command sets the date to March 1, 2022. From this date, the program reports the profit of the day before it.
+
+Please note that the date format should always be in the format of "YYYY-MM-DD".
+
+That's it! You're now ready to start using the SuperPy tool

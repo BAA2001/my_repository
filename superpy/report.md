@@ -1,0 +1,9 @@
+This command line tool SuperPy makes use of several notable technical elements that are worth highlighting. In this short report I would like to highlight three ones.
+
+The first notable technical element is the use of the pandas library to handle data storage and manipulation. I chose to use pandas because it is a powerful and widely-used library for data manipulation and analysis, and it makes it easy to read and write data to and from CSV files. With pandas, I was able to create DataFrames to store the purchase and sales data, and then easily manipulate and analyze that data to generate reports.
+
+The second notable technical element is the use of the dateutil library's parse function to convert string date inputs to datetime objects. This is important because it allows the script to handle various date formats and also allows for easy comparison of dates. This was an important feature because the script needs to be able to handle different date formats that may be provided by the user, and also compare dates to determine the expiration date of an item, or when it was sold.
+
+The third notable technical element is the use of global variables to store the current date being used in the script. This allows the script to easily reference the current date and update it when necessary. This is important because the script needs to be able to reference the current date when generating reports or comparing dates of purchases and sales.
+
+Overall, implementation of these technical elements in SuperPy allows for a clear and efficient way to handle command line arguments, dates, and data storage and manipulation, which makes the script easy to use and understand for users. These elements ensure that the script will be maintainable and extensible for future development.
