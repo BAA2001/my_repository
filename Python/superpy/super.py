@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 from termcolor import colored
+from tabulate import tabulate
 
 # Do not change these lines.
 __winc_id__ = "a2bc36ea784242e4989deb157d527ba0"
@@ -113,8 +114,12 @@ if args.set_time:
     else:
         print(colored(f"Current date: {args.set_time}", "magenta"))
 
+args.bname = args.bname.lower()
+args.sname = args.sname.lower()
+
 
 def to_buy():
+
     # record buying in separate .csv file
     def record_buying():
         b_file = str(os.path.abspath("bought.csv"))
@@ -363,7 +368,9 @@ def to_report():
                 ]
 
                 # Print the filtered inventory
-                print(inventory_df_filtered)
+                print(
+                    tabulate(inventory_df_filtered, headers="keys", tablefmt="pretty")
+                )
 
         except FileNotFoundError:
             print(
