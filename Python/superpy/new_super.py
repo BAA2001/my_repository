@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 from termcolor import colored
+from tabulate import tabulate
 
 # Do not change these lines.
 __winc_id__ = "a2bc36ea784242e4989deb157d527ba0"
@@ -21,7 +22,6 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--set_time",
     type=str,
-    default=datetime.now().strftime("%Y-%m-%d"),
     help="Set the date for which the report is generated in format %Y-%m-%d",
 )
 
@@ -82,50 +82,65 @@ report.add_argument("-p", "--profit", type=str, help="generate report on profit"
 
 args = parser.parse_args()
 
-# Global variable to store the current date
-today = datetime.now().strftime("%Y-%m-%d")
-
-# Function to set the date
-
-
-def set_time(date=None):
-    global today
-    if date:
-        try:
-            # Format the date to YYYY-MM-DD
-            today = datetime.strptime(date, "%Y-%m-%d").strftime("%Y-%m-%d")
-        except ValueError:
-            print("Invalid date format, please use %Y-%m-%d")
-    else:
-        today = datetime.now().strftime("%Y-%m-%d")
-
-
-# Set the date if the --set_time argument is provided
 if args.set_time:
-    set_time(args.set_time)
-    now = datetime.strptime(today, "%Y-%m-%d")
-    if args.set_time == "today":
-        date_obj = now
-        print(colored(f"Current date: {date_obj}", "magenta"))
-    elif args.set_time == "yesterday":
-        date_obj = now - timedelta(days=1)
-        print(colored(f"Current date: {date_obj}", "magenta"))
-    else:
-        print(colored(f"Current date: {args.set_time}", "magenta"))
+    try:
+        if args.set_time == "today":
+            current_date = datetime.now().date()
+            current_date = datetime.strftime(current_date, "%Y-%m-%d")
+            with open("current_date.txt", "w") as f:
+                f.write(str(current_date))
+            print(colored(f"Current date: {current_date}", "magenta"))
+        elif args.set_time == "now":
+            current_date = datetime.now().date()
+            with open("current_date.txt", "w") as f:
+                f.write(str(current_date))
+            print(colored(f"Current date: {current_date}", "magenta"))
+        elif args.set_time == "yesterday":
+            current_date = datetime.now().date() - timedelta(days=1)
+            with open("current_date.txt", "w") as f:
+                f.write(str(current_date))
+            print(colored(f"Current date: {current_date}", "magenta"))
+        else:
+            with open("current_date.txt", "w") as f:
+                f.write(args.set_time)
+            with open("current_date.txt", "r") as f:
+                current_date = f.read()
+            print(colored(f"Current date: {current_date}", "magenta"))
+    except ValueError:
+        print("Invalid date format, please use %Y-%m-%d")
+
+else:
+    with open("current_date.txt", "r") as f:
+        content = f.read()
+        if len(content) == 0:
+            current_date = datetime.now().date()
+        else:
+            current_date = datetime.strptime(content, "%Y-%m-%d").date()
+    print(colored(f"Current date: {current_date}", "magenta"))
 
 
 def to_buy():
+    args.bname = args.bname.lower()
+
+    expiration_str = args.expiration
+    expiration_date = datetime.strptime(expiration_str, "%Y-%m-%d")
+
+    if expiration_date < datetime.strptime(str(current_date), "%Y-%m-%d"):
+        print(colored("This product is expired!", "red"))
+        return
+
     # record buying in separate .csv file
     def record_buying():
+
         b_file = str(os.path.abspath("bought.csv"))
-        args.bdate = datetime.now().date()
+        args.bdate = current_date
 
         if not os.path.exists("bought.csv") or os.path.getsize(b_file) == 0:
             b_df = pd.DataFrame(columns=["Name", "Buy Count", "Buy Price", "Date"])
             b_df.to_csv(b_file, index=False)
 
         b_df = pd.read_csv(b_file)
-        b_df["Date"] = pd.to_datetime(datetime.now())
+        # b_df["Date"] = current_date
 
         # Check if the name is already present in the dataframe
         if args.bname in b_df["Name"].values:
@@ -137,7 +152,7 @@ def to_buy():
                 "Name": args.bname,
                 "Buy Count": args.bcount,
                 "Buy Price": args.bprice,
-                "Date": args.bdate,
+                "Date": current_date,
             }
             b_df_nrow = pd.DataFrame(data, columns=b_df.columns, index=[len(b_df)])
             b_df = pd.concat([b_df, b_df_nrow], ignore_index=True)
@@ -158,7 +173,7 @@ def to_buy():
         df.to_csv(file, index=False)
 
     # parse expiration date
-    date_object = parse(args.expiration)
+    exp_date = parse(args.expiration)
 
     # Read the existing data from the file
     df = pd.read_csv(file)
@@ -175,14 +190,14 @@ def to_buy():
             "Name": args.bname,
             "Count": args.bcount,
             "Price": args.bprice,
-            "Expiration": date_object,
-            "Date of Addition": datetime.now().date().strftime("%Y-%m-%d"),
+            "Expiration": exp_date,
+            "Date of Addition": current_date,
         }
         df_new_row = pd.DataFrame(data, columns=df.columns, index=[len(df)])
         df = pd.concat([df, df_new_row], ignore_index=True)
         print(
             colored(
-                f"You bought {args.bcount} of {args.bname} for the price of {args.bprice}. Expiration date: {date_object}",
+                f"You bought {args.bcount} of {args.bname} for the price of {args.bprice}. Expiration date: {exp_date}",
                 "green",
             )
         )
@@ -192,6 +207,9 @@ def to_buy():
 
 
 def to_sell():
+
+    args.sname = args.sname.lower()
+
     try:
 
         def record_selling():
@@ -203,7 +221,7 @@ def to_sell():
             # Check if the item is expired
             item_expiry = inventory_df[inventory_df["Name"] == args.sname]["Expiration"]
             if (
-                len(item_expiry) > 0 and pd.to_datetime(item_expiry.iat[0]).date() < datetime.now().date()  # type: ignore
+                len(item_expiry) > 0 and pd.to_datetime(item_expiry.iat[0]).date() < current_date  # type: ignore
             ):
                 inventory_df = inventory_df[inventory_df.Name != args.sname]
                 return
@@ -231,7 +249,7 @@ def to_sell():
                     "Name": args.sname,
                     "Sell Count": args.scount,
                     "Sell Price": args.sprice,
-                    "Date": args.sdate,
+                    "Date": current_date,
                 }
                 s_df_nrow = pd.DataFrame(data, columns=s_df.columns, index=[len(s_df)])
                 s_df = pd.concat([s_df, s_df_nrow], ignore_index=True)
@@ -340,14 +358,7 @@ def to_report():
 
                 # Get the date object based on the inventory argument
                 try:
-                    if args.inventory == "now":
-                        date_obj = now
-                    elif args.inventory == "today":
-                        date_obj = now
-                    elif args.inventory == "yesterday":
-                        date_obj = now - timedelta(days=1)
-                    else:
-                        date_obj = parse(args.inventory)
+                    date_obj = parse(args.inventory)
                 except ValueError:
                     print(
                         colored(
@@ -357,13 +368,27 @@ def to_report():
                     )
                     return
 
+                # Convert the "Date of Addition" column to datetime if needed
+                inventory_df["Date of Addition"] = pd.to_datetime(
+                    inventory_df["Date of Addition"]
+                )
+
                 # Filter the inventory dataframe based on the date object
-                inventory_df_filtered = inventory_df[
-                    inventory_df["Date of Addition"].dt.date == date_obj.date()
+                inventory_df_filtered = inventory_df.loc[
+                    inventory_df["Date of Addition"] <= date_obj
                 ]
 
                 # Print the filtered inventory
-                print(inventory_df_filtered)
+                print(
+                    colored(
+                        tabulate(
+                            inventory_df_filtered,
+                            headers="keys",
+                            tablefmt="pretty",
+                        ),
+                        "blue",
+                    )
+                )
 
         except FileNotFoundError:
             print(
@@ -395,7 +420,7 @@ def to_report():
                     return
 
                 # Set time
-                now = datetime.strptime(today, "%Y-%m-%d")
+                now = current_date
 
                 # Get the date object based on the inventory argument
                 try:
@@ -404,7 +429,9 @@ def to_report():
                     elif args.revenue == "today":
                         date_obj = now
                     elif args.revenue == "yesterday":
-                        date_obj = now - timedelta(days=1)
+                        date_obj = datetime.strptime(now, "%Y-%m-%d") - timedelta(
+                            days=1
+                        )
                     else:
                         date_obj = parse(args.revenue)
                 except ValueError:
@@ -450,7 +477,7 @@ def to_report():
                 return
 
             # Set time
-            now = datetime.strptime(today, "%Y-%m-%d")
+            now = current_date
 
             # Get the date object based on the inventory argument
             try:
@@ -459,7 +486,7 @@ def to_report():
                 elif args.profit == "today":
                     date_obj = now
                 elif args.profit == "yesterday":
-                    date_obj = now - timedelta(days=1)
+                    date_obj = datetime.strptime(now, "%Y-%m-%d") - timedelta(days=1)
                 else:
                     date_obj = parse(args.profit)
             except ValueError:
