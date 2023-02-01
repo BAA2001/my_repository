@@ -1,4 +1,4 @@
-import peewee
+import peewee  # type: ignore
 
 db = peewee.SqliteDatabase("betsy.db")
 
