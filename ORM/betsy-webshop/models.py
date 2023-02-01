@@ -6,9 +6,10 @@ db = peewee.SqliteDatabase("betsy.db")
 class BaseModel(peewee.Model):
     class Meta:
         database = db
+        db_table = "user"
 
 
-class User(BaseModel):
+class Users(BaseModel):
     name = peewee.CharField()
     address = peewee.CharField()
     billing_info = peewee.CharField()
@@ -23,7 +24,7 @@ class Product(BaseModel):
     description = peewee.CharField()
     price = peewee.DecimalField()
     quantity = peewee.IntegerField()
-    owner = peewee.ForeignKeyField(User, backref="products")
+    owner = peewee.ForeignKeyField(Users, backref="products")
     tags = peewee.ManyToManyField(Tag, backref="products")
 
 
@@ -33,6 +34,6 @@ class ProductTag(BaseModel):
 
 
 class Transaction(BaseModel):
-    buyer = peewee.ForeignKeyField(User, backref="purchases")
+    buyer = peewee.ForeignKeyField(Users, backref="purchases")
     product = peewee.ForeignKeyField(Product)
     quantity = peewee.IntegerField()

@@ -1,4 +1,4 @@
-from models import User, Product, Tag, Transaction, ProductTag
+from models import Users, Product, Tag, Transaction, ProductTag
 from models import db
 from main import (
     search,
@@ -12,8 +12,8 @@ from main import (
 
 def populate_test_database():
     # Create example data
-    user1 = User.create(name="Bilal", address="123 street", billing_info="Visa 200")
-    user2 = User.create(name="Rachid", address="456 street", billing_info="MC 56")
+    user1 = Users.create(name="Bilal", address="123 street", billing_info="Visa 200")
+    user2 = Users.create(name="Rachid", address="456 street", billing_info="MC 56")
     product1 = Product.create(
         name="Jacket",
         description="Warm and cozy.",
