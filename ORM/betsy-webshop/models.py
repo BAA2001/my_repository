@@ -36,7 +36,3 @@ class Transaction(BaseModel):
     buyer = peewee.ForeignKeyField(User, backref="purchases")
     product = peewee.ForeignKeyField(Product)
     quantity = peewee.IntegerField()
-
-
-db.connect()
-db.create_tables([User, Product, Tag, ProductTag, Transaction])
